@@ -6,7 +6,8 @@ public class PlayerControler : MonoBehaviour
 {
     [SerializeField]
     public float movementSpeed;
-    
+
+    public static int  rau = 0;
     private Rigidbody2D rb;
 
     private Vector2 moveVelocity;
@@ -16,6 +17,10 @@ public class PlayerControler : MonoBehaviour
     [SerializeField]
     private GameObject arrowPrefab;
     private string leftPressed;
+
+    public double DelayBetweenThrows = 0.7;
+
+    float lastThrowDate;
 
     public GameObject ArrowPrefab
     {
@@ -35,8 +40,11 @@ public class PlayerControler : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         myAnimator = GetComponent<Animator>();
+        lastThrowDate = Time.time;
     }
 
+    
+     
     //reset all the values of the animations
     void ResetPressed()
     {
@@ -49,17 +57,18 @@ public class PlayerControler : MonoBehaviour
 
     void Update()
     {
-
+        if (Enemy.nr == 1)
+            rau = 1;
         //movement:
         float moveHorizontal = 0f;
         float moveVertical = 0f;
-         moveHorizontal = Input.GetAxis("Horizontal");
-         moveVertical = Input.GetAxis("Vertical");
+        moveHorizontal = Input.GetAxis("Horizontal");
+        moveVertical = Input.GetAxis("Vertical");
 
         Vector2 moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         moveVelocity = moveInput.normalized * movementSpeed;
 
-        
+
         if (moveHorizontal < 0)
         {
             ResetPressed();
@@ -67,7 +76,7 @@ public class PlayerControler : MonoBehaviour
 
         }
 
-        if (moveHorizontal>  0)
+        if (moveHorizontal > 0)
         {
             ResetPressed();
             myAnimator.SetBool("rightPressed", true);
@@ -92,30 +101,34 @@ public class PlayerControler : MonoBehaviour
 
         //setting animations for moving directions
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Return))
         {
-            if (myAnimator.GetBool("leftPressed"))
+            if ((Time.time - lastThrowDate > DelayBetweenThrows))
             {
-                GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, 0)));
-                tmp.GetComponent<Arrow>().Initialize(Vector2.left);
-            }
+                lastThrowDate = Time.time;
+                if (myAnimator.GetBool("leftPressed"))
+                {
+                    GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, 0)));
+                    tmp.GetComponent<Arrow>().Initialize(Vector2.left);
+                }
 
-            if (myAnimator.GetBool("rightPressed"))
-            {
-                GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, -180)));
-                tmp.GetComponent<Arrow>().Initialize(Vector2.right);
-            }
+                if (myAnimator.GetBool("rightPressed"))
+                {
+                    GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, -180)));
+                    tmp.GetComponent<Arrow>().Initialize(Vector2.right);
+                }
 
-            if (myAnimator.GetBool("downPressed"))
-            {
-                GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, 90)));
-                tmp.GetComponent<Arrow>().Initialize(Vector2.down);
-            }
+                if (myAnimator.GetBool("downPressed"))
+                {
+                    GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, 90)));
+                    tmp.GetComponent<Arrow>().Initialize(Vector2.down);
+                }
 
-            if (myAnimator.GetBool("upPressed"))
-            {
-                GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, -90)));
-                tmp.GetComponent<Arrow>().Initialize(Vector2.up);
+                if (myAnimator.GetBool("upPressed"))
+                {
+                    GameObject tmp = (GameObject)Instantiate(arrowPrefab, transform.position, Quaternion.Euler(new Vector3(0, 0, -90)));
+                    tmp.GetComponent<Arrow>().Initialize(Vector2.up);
+                }
             }
         }
     }
@@ -126,5 +139,7 @@ public class PlayerControler : MonoBehaviour
         rb.MovePosition(rb.position + moveVelocity * Time.fixedDeltaTime);
 
     }
+
+    
     
 }
